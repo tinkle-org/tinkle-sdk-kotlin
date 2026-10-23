@@ -59,14 +59,14 @@ class ConsumerRulesTest(unittest.TestCase):
         stripped = '\n'.join(line.split('#', 1)[0].strip() for line in smoke.splitlines())
         for package in ('platform', 'runner', 'monitor'):
             self.assertIn(f'-keep class androidx.test.{package}.** {{ *; }}', stripped)
-        # The app mapping folds Intrinsics to p.f and R8 removes overloads the
-        # test runner calls at startup; keep the whole class, sample-only.
-        self.assertIn('-keep class kotlin.jvm.internal.Intrinsics { *; }', stripped)
+        # R8 folds Intrinsics to p.f and strips Lambda, both needed by the test
+        # runner at startup; keep the Kotlin runtime in this sample-only config.
+        self.assertIn('-keep class kotlin.** { *; }', stripped)
         self.assertIn('-keep class com.tinkle.sdk.smoke.SmokeChecks { public static void run(); }', stripped)
         self.assertNotRegex(stripped, r'(?m)^-(dontwarn|ignorewarnings|dontshrink|dontoptimize|dontobfuscate)\b')
-        # Shipped scope is unchanged: no androidx.test or Intrinsics keeps, still only the 4 AWT dontwarns.
+        # Shipped scope is unchanged: no androidx.test or kotlin keeps, still only the 4 AWT dontwarns.
         self.assertNotIn('androidx.test', RULES)
-        self.assertNotIn('Intrinsics', RULES)
+        self.assertNotIn('kotlin.', RULES)
         self.assertNotIn('androidx.test', (ROOT / 'consumer-rules.pro').read_text())
         suppressions = re.findall(r'(?m)^-dontwarn\b([^\n]*)$', RULES)
         self.assertCountEqual([value.strip() for value in suppressions], [

@@ -8,5 +8,8 @@
 -keep class androidx.test.monitor.** { *; }
 # The app mapping folds kotlin.jvm.internal.Intrinsics to p.f and R8 removes
 # overloads such as checkNotNullExpressionValue(Object, String); the test
-# runner calls into it at startup and crashes when it is absent. Sample-only.
--keep class kotlin.jvm.internal.Intrinsics { *; }
+# runner calls into it at startup and crashes when it is absent. Likewise R8
+# strips kotlin.jvm.internal.Lambda, which AndroidX Test's FileTestStorage
+# needs at runner startup. Keep the whole Kotlin runtime in this sample-only
+# config; the shipped SDK rules are unaffected.
+-keep class kotlin.** { *; }
