@@ -1,0 +1,21 @@
+sample/src/main/kotlin/com/tinkle/sdk/smoke/SmokeChecks.kt
+  s_8c41e066727d15::t_2f6fb58ba83760 38,40
+tests/test_smoke_fixture.py
+  s_8c41e066727d15::t_ac5b9edcb664b7 1-20
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.7.5",
+  "base_commit_sha": "904e246fa5a56eb8ff28a289188dcc9f3ca85006",
+  "prompts": {},
+  "sessions": {
+    "s_8c41e066727d15": {
+      "agent_id": {
+        "tool": "opencode",
+        "id": "ses_e9626071bffeqw6bXvyE2Bn3vi",
+        "model": "glm-5.3-flash"
+      },
+      "human_author": "oscarlaw <oscarlaw2010@gmail.com>"
+    }
+  }
+}
