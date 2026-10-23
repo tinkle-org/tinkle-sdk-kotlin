@@ -53,4 +53,7 @@ dependencies {
     }
     androidTestImplementation("androidx.test.ext:junit:1.3.0")
     androidTestImplementation("androidx.test:runner:1.7.0")
+    // AndroidX Test monitor references these annotations without declaring them in its POM.
+    // CLASS-retained annotations belong on R8's library classpath, not in the test APK.
+    androidTestCompileOnly("com.google.errorprone:error_prone_annotations:2.36.0")
 }
