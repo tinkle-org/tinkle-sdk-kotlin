@@ -35,8 +35,9 @@ public object SmokeChecks {
                 override suspend fun clearPrincipal(principal: String) = Unit
             }
             LoopbackGateway().use { gateway ->
+                // syntra-ws pins the Syntra endpoint path; a bare host:port URL is rejected.
                 val client = TinkleClient(
-                    ClientConfigFfi("ws://127.0.0.1:${gateway.port}", true, null),
+                    ClientConfigFfi("ws://127.0.0.1:${gateway.port}/syntra/v1/ws", true, null),
                     "local-smoke-fixture",
                     foreignStore,
                 )
