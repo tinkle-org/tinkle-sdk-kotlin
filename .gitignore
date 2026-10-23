@@ -1,6 +1,9 @@
 .gradle/
 .kotlin/
 **/build/
+# Keep the build-logic package named "build" visible to Git.
+!buildSrc/src/main/groovy/com/tinkle/build/
+!buildSrc/src/test/groovy/com/tinkle/build/
 local.properties
 *.iml
 .idea/
