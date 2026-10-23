@@ -1,0 +1,42 @@
+buildSrc/src/test/groovy/com/tinkle/build/SdkArtifactsTest.groovy
+  s_382dbd3cb9e48c::t_1963f14f194049 1-99
+buildSrc/src/test/groovy/com/tinkle/build/PrepareSdkArtifactsTest.groovy
+  s_382dbd3cb9e48c::t_733cb123c1501e 3,94-128
+  s_382dbd3cb9e48c::t_282238874b7ca7 1-2,4-93,129-130
+.gitignore
+  s_b206040f051a0b::t_7c0804040f2f6f 4-6
+.github/workflows/ci.yml
+  s_b206040f051a0b::t_7c0804040f2f6f 18-38
+buildSrc/src/main/groovy/com/tinkle/build/SdkArtifacts.groovy
+  s_382dbd3cb9e48c::t_bebb781b0c06e4 1-11,13-146
+  s_382dbd3cb9e48c::t_c6a81fd521dcf9 12
+buildSrc/src/main/groovy/com/tinkle/build/PrepareSdkArtifacts.groovy
+  s_382dbd3cb9e48c::t_d4744dce3a5671 67
+  s_382dbd3cb9e48c::t_bebb781b0c06e4 1-7,9-13,15-32,35-37,39-66,68-70
+  s_382dbd3cb9e48c::t_1963f14f194049 8,14,38
+  s_382dbd3cb9e48c::t_5863e0ada10481 33-34
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.7.5",
+  "base_commit_sha": "ae4f49c5493053629cb9cb4147324c19d0d49e51",
+  "prompts": {},
+  "sessions": {
+    "s_382dbd3cb9e48c": {
+      "agent_id": {
+        "tool": "opencode",
+        "id": "ses_e992abc53ffekZbxUlYUY7Ggo0",
+        "model": "gpt-6.1-sol"
+      },
+      "human_author": "oscarlaw <oscarlaw2010@gmail.com>"
+    },
+    "s_b206040f051a0b": {
+      "agent_id": {
+        "tool": "opencode",
+        "id": "ses_e96b7a6ecffefceR32oHPt7XrM",
+        "model": "gpt-6.1-sol"
+      },
+      "human_author": "oscarlaw <oscarlaw2010@gmail.com>"
+    }
+  }
+}
