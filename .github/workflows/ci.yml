@@ -36,6 +36,8 @@ jobs:
           test -f buildSrc/src/test/groovy/com/tinkle/build/SdkArtifactsTest.groovy
       - name: Test build logic without native release artifacts
         run: ./gradlew --no-daemon -p buildSrc test
+      - name: Test SDK Python checks
+        run: python3 -B -m unittest discover -s tests -v
   source:
     runs-on: ubuntu-latest
     outputs:

@@ -50,18 +50,12 @@ class ConsumerRulesTest(unittest.TestCase):
         self.assertRegex(version, r'^\d+\.\d+\.\d+$')
         self.assertNotIn('com.google.errorprone', (ROOT / 'build.gradle.kts').read_text())
 
-    def test_test_apk_keeps_are_sample_only_and_minify_remains(self):
-        # minifyDebugAndroidTestWithR8 obfuscates AndroidX Test startup
-        # (AppComponentFactoryRegistry -> minified p.f NoSuchMethodError).
-        # The keeps must live in the sample only, never in shipped rules,
-        # without -dontwarn and without disabling R8 for the app.
+    def test_reference_derived_keeps_replace_blanket_sample_keeps(self):
         smoke = (ROOT / 'sample/smoke-rules.pro').read_text()
         stripped = '\n'.join(line.split('#', 1)[0].strip() for line in smoke.splitlines())
-        for package in ('platform', 'runner', 'monitor'):
-            self.assertIn(f'-keep class androidx.test.{package}.** {{ *; }}', stripped)
-        # R8 folds Intrinsics to p.f and strips Lambda, both needed by the test
-        # runner at startup; keep the Kotlin runtime in this sample-only config.
-        self.assertIn('-keep class kotlin.** { *; }', stripped)
+        self.assertNotIn('**', stripped)
+        self.assertNotIn('kotlin.', stripped)
+        self.assertNotIn('androidx.test.', stripped)
         self.assertIn('-keep class com.tinkle.sdk.smoke.SmokeChecks { public static void run(); }', stripped)
         self.assertNotRegex(stripped, r'(?m)^-(dontwarn|ignorewarnings|dontshrink|dontoptimize|dontobfuscate)\b')
         # Shipped scope is unchanged: no androidx.test or kotlin keeps, still only the 4 AWT dontwarns.
@@ -75,12 +69,19 @@ class ConsumerRulesTest(unittest.TestCase):
             'java.awt.HeadlessException',
             'java.awt.Window',
         ])
-        # Both debug build types (app + androidTest) still minify.
+        # App R8 shrinks/optimizes/obfuscates. AGP's test R8 pass applies app
+        # mapping with test-code shrinking/optimization/obfuscation disabled.
         sample = (ROOT / 'sample/build.gradle.kts').read_text()
         for build_type in ('debug', 'release'):
             block = re.search(rf'\b{build_type}\s*\{{([^}}]*)\}}', sample).group(1)
             self.assertIn('isMinifyEnabled = true', block)
         self.assertNotIn('isMinifyEnabled = false', sample)
+
+    def test_agp_supports_pinned_kotlin_metadata(self):
+        root = (ROOT / 'build.gradle.kts').read_text()
+        for plugin in ('library', 'application'):
+            self.assertIn(f'id("com.android.{plugin}") version "8.13.2"', root)
+        self.assertIn('id("org.jetbrains.kotlin.android") version "2.3.0"', root)
 
 
 if __name__ == '__main__':

@@ -1,3 +1,7 @@
+import com.android.build.api.artifact.ScopedArtifact
+import com.android.build.api.variant.ScopedArtifacts
+import com.tinkle.build.GenerateInstrumentationKeeps
+
 plugins {
     id("com.android.application")
     id("org.jetbrains.kotlin.android")
@@ -38,6 +42,53 @@ android {
 }
 
 kotlin { jvmToolchain(17) }
+
+androidComponents {
+    onVariants { variant ->
+        variant.androidTest?.let { test ->
+            val generate = tasks.register<GenerateInstrumentationKeeps>(
+                "generate${variant.name.replaceFirstChar { it.uppercase() }}InstrumentationKeeps"
+            ) {
+                // Includes compile-only annotations as resolution libraries as well
+                // as android.jar. Neither contributes source references or keeps.
+                libraries.from(sdkComponents.bootClasspath, test.compileClasspath)
+                // JUnit3 adapters in runner reference the SDK's optional test APIs.
+                libraries.from(sdkComponents.sdkDirectory.map { sdk ->
+                    listOf("base", "mock", "runner").map {
+                        sdk.file("platforms/android-${android.compileSdk}/optional/android.test.$it.jar")
+                    }
+                })
+                // monitor 1.8.0 invokes these hidden Instrumentation methods.
+                // AndroidX's bridge has no bodies in the AAR and android.jar
+                // omits hidden APIs. Exempt only these five exact signatures;
+                // every other missing class/member remains an error. See README.
+                val bridge = "android.app.Instrumentation\$ActivityResult androidx.test.internal.runner.hidden.ExposedInstrumentationApi.execStartActivity"
+                val prefix = "android.content.Context, android.os.IBinder, android.os.IBinder, "
+                platformStubMethods.set(listOf(
+                    "$bridge(${prefix}android.app.Activity, android.content.Intent, int)",
+                    "$bridge(${prefix}android.app.Activity, android.content.Intent, int, android.os.Bundle)",
+                    "$bridge(${prefix}android.app.Activity, android.content.Intent, int, android.os.Bundle, android.os.UserHandle)",
+                    "$bridge(${prefix}android.app.Fragment, android.content.Intent, int, android.os.Bundle)",
+                    "$bridge(${prefix}java.lang.String, android.content.Intent, int, android.os.Bundle)"
+                ))
+                rulesFile.set(layout.buildDirectory.file("generated/instrumentation-keeps/${variant.name}.pro"))
+            }
+            variant.artifacts.forScope(ScopedArtifacts.Scope.ALL).use(generate).toGet(
+                ScopedArtifact.CLASSES,
+                GenerateInstrumentationKeeps::getTargetJars,
+                GenerateInstrumentationKeeps::getTargetDirectories
+            )
+            test.artifacts.forScope(ScopedArtifacts.Scope.ALL).use(generate).toGet(
+                ScopedArtifact.CLASSES,
+                GenerateInstrumentationKeeps::getSourceJars,
+                GenerateInstrumentationKeeps::getSourceDirectories
+            )
+            // Provider carries the generation dependency to app R8. Test class
+            // compilation needs app classfiles, never app R8/mapping/APK outputs.
+            variant.proguardFiles.add(generate.flatMap { it.rulesFile })
+        }
+    }
+}
 
 dependencies {
     val suppliedAar = providers.gradleProperty("tinkleSdkTestAar").orElse(providers.environmentVariable("TINKLE_SDK_TEST_AAR"))
