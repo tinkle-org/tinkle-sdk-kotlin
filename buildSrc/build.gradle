@@ -2,11 +2,13 @@ plugins {
     id 'groovy'
 }
 
-repositories { mavenCentral() }
+repositories { google(); mavenCentral() }
 
 dependencies {
     implementation gradleApi()
     implementation localGroovy()
+    // Match AGP 8.13.2's R8, including Kotlin 2.3 metadata support.
+    implementation 'com.android.tools:r8:8.13.19'
     testImplementation 'junit:junit:4.13.2'
 }
 
