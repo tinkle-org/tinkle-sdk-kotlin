@@ -10,12 +10,13 @@ import java.net.InetAddress
 import java.net.ServerSocket
 import java.net.Socket
 import java.security.MessageDigest
+import java.util.concurrent.ConcurrentLinkedQueue
 import java.util.concurrent.atomic.AtomicReference
 import kotlin.concurrent.thread
 
 /**
  * Test fixture only, mirroring libtinkle's client_integration.rs gateway.
- * Fixed wire field IDs come from syntra.v1.Frame and tinkle.v1.SubscribeResponse.
+ * Fixed wire field IDs come from syntra.v1.Frame and tinkle.v1.GetTargetChangesResponse.
  * It serves one loopback client and one RPC; it is not a protocol implementation.
  */
 internal class LoopbackGateway : AutoCloseable {
@@ -23,6 +24,7 @@ internal class LoopbackGateway : AutoCloseable {
     private val failure = AtomicReference<Throwable?>()
     @Volatile private var connection: Socket? = null
     val port: Int get() = listener.localPort
+    val requests = ConcurrentLinkedQueue<Pair<String, Long>>()
     private val worker = thread(name = "tinkle-smoke-gateway", isDaemon = true) {
         try {
             listener.accept().use { socket ->
@@ -51,10 +53,19 @@ internal class LoopbackGateway : AutoCloseable {
                     val frame = fields(readBinary(input, output) ?: break)
                     val request = frame[12] as? ByteArray ?: continue
                     val rpc = fields(request)
-                    check((rpc[1] as ByteArray).toString(Charsets.UTF_8) == "/tinkle.v1.Realtime/SubscribeBatched")
+                    check((rpc[1] as ByteArray).toString(Charsets.UTF_8) == "/tinkle.v1.MessagesService/GetTargetChanges")
                     val payload = fields(rpc[2] as? ByteArray ?: byteArrayOf())
-                    val cursor = payload[1] as? Long ?: 0L
-                    val response = bytes(2, "user:42".toByteArray()) + number(3, cursor)
+                    val target = fields(payload[1] as ByteArray)
+                    val targetKey = when {
+                        target[1] is Long -> "target:user:${target[1]}"
+                        target[2] is Long -> "target:room:${target[2]}"
+                        else -> error("Missing fixture target")
+                    }
+                    val cursor = payload[2] as? Long ?: 0L
+                    requests.add(targetKey to cursor)
+                    // Empty changes, explicitly caught up, with the request cursor
+                    // echoed as last_accept_seq (no fabricated journal progress).
+                    val response = number(2, 0L) + number(3, cursor)
                     send(output, number(1, 1) + number(2, frame[2] as Long) + bytes(13, bytes(1, response)))
                 }
             }
