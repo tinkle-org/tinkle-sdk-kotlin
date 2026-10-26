@@ -1,0 +1,23 @@
+.gitignore
+  s_5ec8b3e1313799::t_977c0d02037ab8 11-12
+sample/src/main/kotlin/com/tinkle/sdk/smoke/LoopbackGateway.kt
+  s_5ec8b3e1313799::t_4255de6bc2771c 13,19,27,56,58-68
+sample/src/main/kotlin/com/tinkle/sdk/smoke/SmokeChecks.kt
+  s_5ec8b3e1313799::t_39fffa7f34ebaa 5-6,8,28-33,36,38-40,42-43,49,55-80
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.7.5",
+  "base_commit_sha": "67c020c50d64c869549c21c375506e1e25833922",
+  "prompts": {},
+  "sessions": {
+    "s_5ec8b3e1313799": {
+      "agent_id": {
+        "tool": "opencode",
+        "id": "ses_e864c1ddaffemfH29ghGFKJ4vZ",
+        "model": "gpt-6.1-sol"
+      },
+      "human_author": "oscarlaw <oscarlaw2010@gmail.com>"
+    }
+  }
+}
